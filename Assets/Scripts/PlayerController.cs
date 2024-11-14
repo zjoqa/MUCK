@@ -132,7 +132,7 @@ public class PlayerController : MonoBehaviour
     }
     private void TryRun()
     {
-        if(Input.GetKey(KeyCode.LeftShift) && theStatusController.GetCurrentSp() > 0)
+        if(Input.GetKey(KeyCode.LeftShift) && theStatusController.GetCurrentSp() > 0 && !Inventory.InventoryActivated)
         {
             Running();
         }

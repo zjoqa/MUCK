@@ -22,7 +22,7 @@ public abstract class CloseWeaponController : MonoBehaviour
 
     protected void TryAttack()
     {
-        if(Input.GetButton("Fire1"))
+        if(Input.GetButton("Fire1") && Inventory.InventoryActivated == false)
         {
             if(!isAttack)
             {

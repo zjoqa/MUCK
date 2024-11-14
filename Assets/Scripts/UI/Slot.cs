@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Unity.VisualStudio.Editor;
+using OpenCover.Framework.Model;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
+using UnityEditor.EventSystems;
 
 public class Slot : MonoBehaviour , IPointerClickHandler , IBeginDragHandler , IDragHandler , IEndDragHandler , IDropHandler
 {
@@ -39,15 +41,15 @@ public class Slot : MonoBehaviour , IPointerClickHandler , IBeginDragHandler , I
         itemCount = _count;
         itemImage.sprite = item.itemImage;
 
-        if(item.itemType != Item.ItemType.Equipment)
+        if(item.itemType != Item.ItemType.Equipment) // 인수로 전달 된 item의 Type가 Equipment가 아니라면
         {
-            go_CountImage.SetActive(true);
-            text_Count.text = itemCount.ToString();
+            go_CountImage.SetActive(true); // CountImage 활성화
+            text_Count.text = itemCount.ToString(); // text_Count.text에 itemCount를ToString해서 저장
         }
-        else
+        else // item의 타입이 Equipment일 경우 
         {
-            text_Count.text = "0";
-            go_CountImage.SetActive(false);
+            text_Count.text = "0"; // 0으로 변경
+            go_CountImage.SetActive(false); // CountImage false
         }
         SetColor(1);
     }
@@ -81,14 +83,22 @@ public class Slot : MonoBehaviour , IPointerClickHandler , IBeginDragHandler , I
             {
                 if(item.itemType == Item.ItemType.Equipment) // 우클릭했을 때 아이템이 장비 아이템일 경우
                 {
-                    if(theWeaponManger.currentEquipWeapon != item.itemName)
+                    if(theWeaponManger.currentEquipWeapon != item.itemName) 
                         StartCoroutine(theWeaponManger.ChangeWeaponCoroutine(item.weaponType, item.itemName));
                 }
-                else if(item.itemType != Item.ItemType.Equipment)
+                else if(item.itemType == Item.ItemType.Used)
                 {
                     Debug.Log(item.itemName + " 을 사용했습니다");
                     SetSlotCount(-1);
                 }
+            }
+        }
+        if (eventData.button == PointerEventData.InputButton.Right && Input.GetKey(KeyCode.LeftShift))
+        {
+            if (item != null)
+            {
+                FindObjectOfType<ItemDropper>().DropItem(item);
+                SetSlotCount(-1);
             }
         }
     }
@@ -99,6 +109,7 @@ public class Slot : MonoBehaviour , IPointerClickHandler , IBeginDragHandler , I
         {
             DragSlot.instance.dragSlot = this; // dragSlot에 자기 자신을 넣어줌으로서 dragslot이 SLot가 됨
             DragSlot.instance.DragSetImage(itemImage);
+            // eventData.position은 현재 마우스의 위치를 제공
             DragSlot.instance.transform.position = eventData.position;
         }
     }
@@ -127,9 +138,12 @@ public class Slot : MonoBehaviour , IPointerClickHandler , IBeginDragHandler , I
     {
         Item _tempItem = item;
         int _tempItemCount = itemCount;
-
+        // OnDrop 실행시 현재 Drop된 슬롯에 AddItem 해줌
         AddItem(DragSlot.instance.dragSlot.item, DragSlot.instance.dragSlot.itemCount);
-
+        ///Summary
+        /// OnBeginDrag 실행시 dragSlot = this 로 초기화
+        /// _tempItem != null 이면 this로 초기화 된 slot에 AddItem
+        ///Summary
         if (_tempItem != null)
             DragSlot.instance.dragSlot.AddItem(_tempItem, _tempItemCount);
         else
